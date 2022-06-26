@@ -1,5 +1,7 @@
 import pygame
 import os # windows系統上下級文件夾操作
+pygame.font.init() # 載入Pygame font library
+pygame.mixer.init() #倒入音樂
 
 WIDTH, HEIGHT = 800, 500 
 WIN = pygame.display.set_mode((WIDTH, HEIGHT)) # 設定寬度和高度
@@ -11,6 +13,12 @@ RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 
 BORDER = pygame.Rect(WIDTH//2 - 5, 0, 10, HEIGHT)
+
+# BULLET_HIT_SOUND = pygame.mixer.music.load('Grenade+1.wav')
+# BULLET_FIRE_SOUND = pygame.mixer.music.load('Gun+Silencer.wav')
+
+HEALTH_FONT = pygame.font.SysFont('comicsans', 40) #設定字型和大小
+WINNER_FONT = pygame.font.SysFont('comicsans', 100) # 勝利字體
 
 # 如果不設定幀率上線的話，就會變成無限制
 FPS = 60
@@ -40,10 +48,16 @@ RED_SPACESHIP = pygame.transform.rotate(
 SPACE = pygame.transform.scale(
     pygame.image.load(os.path.join('Pygame in 90 Minutes-For Beginners\Assets', 'space.png')), (WIDTH, HEIGHT))
 
-def draw_window(red, yellow, red_bullets, yellow_bullets):
+def draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_health):
     WIN.blit(SPACE, (0, 0))
     # WIN.fill(WHITE) # 因為pygame不會移除上一幀的畫面，如果不添加白色的遮擋，每一幀的軌道就都會保留下來
     pygame.draw.rect(WIN, BLACK, BORDER)
+
+    red_health_text = HEALTH_FONT.render(f'Red Health: {red_health}', True, RED)
+    yellow_health_text = HEALTH_FONT.render(f'Yellow Health: {yellow_health}', True, YELLOW)
+    WIN.blit(red_health_text, (WIDTH//2 - red_health_text.get_width()-110,0))
+    WIN.blit(yellow_health_text, (WIDTH - yellow_health_text.get_width()-20, 0))
+
     WIN.blit(YELLOW_SPACESHIP, (yellow.x, yellow.y)) # 透過blit這個函數，將img放到畫面中
     WIN.blit(RED_SPACESHIP, (red.x, red.y))
 
@@ -95,6 +109,13 @@ def handle_bullets(yellow_bullets, red_bullets, yellow, red):
         elif bullet.x < 0:
             yellow_bullets.remove(bullet)
 
+# 勝利界面
+def draw_winner(text):
+    draw_text = WINNER_FONT.render(text, 1, WHITE)
+    WIN.blit(draw_text, (WIDTH//2 - draw_text.get_width()//2, HEIGHT//2 - draw_text.get_height()//2))
+    pygame.display.update()
+    pygame.time.delay(5000) # 當延時等待5秒後，再重新開始
+
 def main():
     # 紅飛機和黃飛機的初始位置
     red = pygame.Rect(WIDTH//2//2-10, HEIGHT//2, SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
@@ -102,6 +123,9 @@ def main():
 
     red_bullets = []
     yellow_bullets = []
+
+    red_health = 10
+    yellow_health = 10
 
     clock = pygame.time.Clock()
     run = True
@@ -112,6 +136,7 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+                pygame.quit() # 當點了退出，則關閉Pygame
 
             # yellow.x += 1
             # red.x += 1
@@ -123,10 +148,34 @@ def main():
                     bullet = pygame.Rect(
                         red.x + red.width, red.y + red.height//2 - 2, 10, 5)
                     red_bullets.append(bullet)
+                    # BULLET_FIRE_SOUND.play()
                 elif event.key == pygame.K_RCTRL and len(yellow_bullets) < MAX_BULLETS:
                     bullet = pygame.Rect(
                         yellow.x + yellow.width, yellow.y + yellow.height//2 - 2, 10, 5)
                     yellow_bullets.append(bullet)
+                    # BULLET_FIRE_SOUND.play()
+
+            # 如果誰被擊中後，扣血
+            if event.type == RED_HIT:
+                red_health -= 1
+                # BULLET_HIT_SOUND.play()
+            elif event.type == YELLOW_HIT:
+                yellow_health -= 1
+                # BULLET_HIT_SOUND.play()
+
+        winner_text = ""
+        # 當誰的血小於0時，結束遊戲
+        if red_health < 0:
+
+            winner_text = 'Yellow Wins! '
+        
+        if yellow_health < 0:
+
+            winner_text = 'Red Wins! '
+        
+        if winner_text != "":
+            draw_winner(winner_text)
+            break
 
         # print(red_bullets, yellow_bullets)
         # 移動飛機
@@ -136,9 +185,11 @@ def main():
 
         handle_bullets(yellow_bullets, red_bullets, yellow, red)
 
-        draw_window(red, yellow, red_bullets, yellow_bullets) # 呼叫背景白色函數
+        draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_health) # 呼叫背景白色函數
 
-    pygame.quit()
+    # pygame.quit() # 如果設定勝利完退出遊戲則寫這行
+    # 如果勝利後想要繼續遊戲，則寫↓
+    main()
 
 if __name__ == '__main__':
     main()
