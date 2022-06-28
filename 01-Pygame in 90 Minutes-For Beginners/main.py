@@ -32,7 +32,7 @@ RED_HIT = pygame.USEREVENT + 2 # unique ID
 
 # 找到黃色飛機
 YELLOW_SPACESHIP_IMAGE = pygame.image.load(
-    os.path.join('Pygame in 90 Minutes-For Beginners\Assets','spaceship_yellow.png'))
+    os.path.join('01-Pygame in 90 Minutes-For Beginners\Assets','spaceship_yellow.png'))
 # 再旋轉素材
 # 設定飛機的大小
 YELLOW_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(
@@ -40,13 +40,13 @@ YELLOW_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(
 
 # 找到紅色飛機
 RED_SPACESHIP_IMAGE = pygame.image.load(
-    os.path.join('Pygame in 90 Minutes-For Beginners\Assets','spaceship_red.png'))
+    os.path.join('01-Pygame in 90 Minutes-For Beginners\Assets','spaceship_red.png'))
 RED_SPACESHIP = pygame.transform.rotate(
     pygame.transform.scale(RED_SPACESHIP_IMAGE, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 90) 
 
 # 加載背景
 SPACE = pygame.transform.scale(
-    pygame.image.load(os.path.join('Pygame in 90 Minutes-For Beginners\Assets', 'space.png')), (WIDTH, HEIGHT))
+    pygame.image.load(os.path.join('01-Pygame in 90 Minutes-For Beginners\Assets', 'space.png')), (WIDTH, HEIGHT))
 
 def draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_health):
     WIN.blit(SPACE, (0, 0))
@@ -165,12 +165,10 @@ def main():
 
         winner_text = ""
         # 當誰的血小於0時，結束遊戲
-        if red_health < 0:
-
+        if red_health <= 0:
             winner_text = 'Yellow Wins! '
         
-        if yellow_health < 0:
-
+        if yellow_health <= 0:
             winner_text = 'Red Wins! '
         
         if winner_text != "":
